@@ -95,6 +95,8 @@ void slave_read() {
 
     slave_set_blocking_io(stdin, 1);
     slave_exec(command_id);
+
+    fflush(0);
 }
 
 int main() {
