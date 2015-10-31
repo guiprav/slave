@@ -19,11 +19,18 @@ awk '
         /^{{name}} / {
             print "echo \"{{result_label}} $(xx -r --{{result_type}})\"" >"'"$cmd_pipe_path"'"
             system("xx --uint32 {{@key}}"{{#each args}} " --{{type}} " ${{add @key 2}}{{/each}});
+            next
         }
     {{/each}}
 
     /^sleep / {
         system("sleep " $2);
+        next
+    }
+
+    {
+        print "Unknown command: " $1 >"/dev/stderr"
+        exit -1
     }
 ' |"$build_path/slave" >"$data_pipe_path" |(
     while read cmd
