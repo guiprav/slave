@@ -1,13 +1,14 @@
 #include <assert.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 
 {{#each fns}}
-    {{result_type}} {{name}}(
+    {{result_type}}_t {{name}}(
         {{#each args}}
-            {{type}} {{name}}{{if_not @last ','}}
+            {{type}}_t {{name}}{{if_not @last ','}}
         {{/each}}
     );
 {{/each}}
@@ -19,11 +20,11 @@
 {{#each fns}}
     void slave_exec_{{name}}() {
         {{#each args}}
-            {{type}} {{name}};
+            {{type}}_t {{name}};
             assert(fread_auto(stdin, &{{name}}, 1));
         {{/each}}
 
-        {{result_type}} result = {{name}}(
+        {{result_type}}_t result = {{name}}(
             {{#each args}}
                 {{name}}{{if_not @last ','}}
             {{/each}}

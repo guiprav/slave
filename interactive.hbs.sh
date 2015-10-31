@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+build_path="$(dirname "${BASH_SOURCE[0]}")"
+
 cmd_pipe_path="/tmp/$$.cmd"
 data_pipe_path="/tmp/$$.data"
 
@@ -15,11 +17,15 @@ chmod 600 "$cmd_pipe_path" "$data_pipe_path"
 awk '
     {{#each fns}}
         /^{{name}} / {
-            print "echo \"{{result_label}} $(xx -r --{{result_type}})\"" >"'"$cmd_file_path"'"
-            system("xx --uint32 @key {{#each args}}--{{type}} " ${{add @key 2}} "{{/each}}");
+            print "echo \"{{result_label}} $(xx -r --{{result_type}})\"" >"'"$cmd_pipe_path"'"
+            system("xx --uint32 {{@key}}"{{#each args}} " --{{type}} " ${{add @key 2}}{{/each}});
         }
     {{/each}}
-' |./a.out >"$data_pipe_path" |(
+
+    /^sleep / {
+        system("sleep " $2);
+    }
+' |"$build_path/slave" >"$data_pipe_path" |(
     while read cmd
     do
         eval "$cmd" <"$data_pipe_path"
