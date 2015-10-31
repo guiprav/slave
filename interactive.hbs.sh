@@ -16,9 +16,11 @@ chmod 600 "$cmd_pipe_path" "$data_pipe_path"
 
 awk '
     {{#each fns}}
-        /^{{name}} / {
-            print "echo \"{{result_label}} $(xx -r --{{result_type}})\"" >"'"$cmd_pipe_path"'"
-            system("xx --uint32 {{@key}}"{{#each args}} " --{{type}} " ${{add @key 2}}{{/each}});
+        /^{{@key}} / {
+            {{#if result_type}}
+                print "echo \"{{result_label}} $(xx -r --{{result_type}})\"" >"'"$cmd_pipe_path"'"
+            {{/if}}
+            system("xx --uint32 {{@index}}"{{#each args}} " --{{type}} " ${{add @index 2}}{{/each}});
             next
         }
     {{/each}}

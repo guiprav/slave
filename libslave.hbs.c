@@ -6,9 +6,14 @@
 #include <fcntl.h>
 
 {{#each fns}}
-    {{result_type}}_t {{name}}(
+    {{result_type}}_t {{@key}}(
         {{#each args}}
-            {{type}}_t {{name}}{{if_not @last ','}}
+            {{#if is_string}}
+                const char *
+            {{else}}
+                {{type}}_t
+            {{/if}}
+            {{@key}}{{if_not @last ','}}
         {{/each}}
     );
 {{/each}}
@@ -18,33 +23,45 @@
 #define fwrite_auto(f, ptr, n) (fwrite(ptr, sizeof(*ptr), n, f))
 
 {{#each fns}}
-    void slave_exec_{{name}}() {
+    void slave_exec_{{@key}}() {
         {{#each args}}
-            {{type}}_t {{name}};
-            assert(fread_auto(stdin, &{{name}}, 1));
+            {{#if is_string}}
+                const char *{{@key}} = 0;
+                size_t {{@key}}__getdelim_n = 0;
+
+                assert(getdelim(&{{@key}}, &{{@key}}__getdelim_n, 0, stdin) != -1);
+            {{else}}
+                {{type}}_t {{@key}};
+                assert(fread_auto(stdin, &{{@key}}, 1));
+            {{/if}}
         {{/each}}
 
-        {{result_type}}_t result = {{name}}(
+        {{#if result_type}}
+            {{result_type}}_t result =
+        {{/if}}
+        {{@key}}(
             {{#each args}}
-                {{name}}{{if_not @last ','}}
+                {{@key}}{{if_not @last ','}}
             {{/each}}
         );
 
-        assert(fwrite_auto(stdout, &result, 1) == 1);
+        {{#if result_type}}
+            assert(fwrite_auto(stdout, &result, 1) == 1);
+        {{/if}}
     }
 {{/each}}
 
 enum slave_command_ids {
     {{#each fns}}
-        slave_command_{{name}}{{if_not @last ','}}
+        slave_command_{{@key}}{{if_not @last ','}}
     {{/each}}
 };
 
 void slave_exec(int command_id) {
     switch(command_id) {
         {{#each fns}}
-            case slave_command_{{name}}:
-                slave_exec_{{name}}();
+            case slave_command_{{@key}}:
+                slave_exec_{{@key}}();
                 break;
         {{/each}}
 
