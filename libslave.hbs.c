@@ -6,7 +6,12 @@
 #include <fcntl.h>
 
 {{#each fns}}
-    {{result_type}}_t {{@key}}(
+    {{#if result_type}}
+        {{result_type}}_t
+    {{else}}
+        void
+    {{/if}}
+    {{@key}}(
         {{#each args}}
             {{#if is_string}}
                 const char *
