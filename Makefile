@@ -1,4 +1,4 @@
-all: build/slave build/interactive.sh
+all: build/slave_test build/interactive.sh
 
 try: all
 	./build/interactive.sh
@@ -6,12 +6,12 @@ try: all
 clean:
 	rm build/*
 
-build/slave: build/libslave.c enslaved.c
-	gcc -std=gnu99 build/libslave.c enslaved.c -o build/slave
-
 build/libslave.c: libslave.hbs.c
-	./libslavegen enslaved.json *.js >build/libslave.c
+	./libslavegen slave_test.json *.js >build/libslave.c
 
-build/interactive.sh: interactive.hbs.sh
-	./libslavegen -i enslaved.json *.js >build/interactive.sh
+build/slave_test: build/libslave.c slave_test.c
+	gcc -std=gnu99 build/libslave.c slave_test.c -o build/slave_test
+
+build/interactive.sh: interactive.hbs.sh build/slave_test
+	./libslavegen -i slave_test.json *.js >build/interactive.sh
 	chmod a+x build/interactive.sh

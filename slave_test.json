@@ -1,4 +1,5 @@
 {
+    "slave_path": "build/slave_test",
     "fns": {
         "add": {
             "result_type": "int32",

@@ -27,14 +27,33 @@
 
 #define fwrite_auto(f, ptr, n) (fwrite(ptr, sizeof(*ptr), n, f))
 
+ssize_t slave_read_cstr(char *buf, size_t buf_len, FILE *f) {
+    for(size_t i = 0; i < buf_len; ++i) {
+        int c = fgetc(f);
+
+        if(c == EOF) {
+            buf[i] = 0;
+            return EOF;
+        }
+
+        buf[i] = c;
+
+        if(c == 0) {
+            break;
+        }
+    }
+
+    return 0;
+}
+
+#define max_string_len (512)
+
 {{#each fns}}
     void slave_exec_{{@key}}() {
         {{#each args}}
             {{#if is_string}}
-                const char *{{@key}} = 0;
-                size_t {{@key}}__getdelim_n = 0;
-
-                assert(getdelim(&{{@key}}, &{{@key}}__getdelim_n, 0, stdin) != -1);
+                char {{@key}}[max_string_len];
+                assert(slave_read_cstr({{@key}}, sizeof({{@key}}), stdin) != -1);
             {{else}}
                 {{type}}_t {{@key}};
                 assert(fread_auto(stdin, &{{@key}}, 1));
@@ -90,6 +109,10 @@ void slave_set_blocking_io(FILE *f, int enable) {
     fcntl(fd, F_SETFL, flags);
 }
 
+int slave_dismissed() {
+    return feof(stdin);
+}
+
 void slave_update() {
     slave_set_blocking_io(stdin, 0);
 
@@ -99,7 +122,7 @@ void slave_update() {
     ret = fread_auto(stdin, &command_id, 1);
 
     if(feof(stdin)) {
-        exit(0);
+        return;
     }
 
     if(ret <= 0 && errno == EWOULDBLOCK) {
@@ -112,10 +135,4 @@ void slave_update() {
     slave_exec(command_id);
 
     fflush(0);
-}
-
-int main() {
-    while(1) {
-        slave_update();
-    }
 }

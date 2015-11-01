@@ -3,12 +3,18 @@ set -e
 
 source_dir_path="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-if [ "$1" = "-i" ];
-then
-    data_path="$2"; shift 2
-    hbs "$source_dir_path/interactive.hbs.sh" "$data_path" "$@"
-    exit
-fi
+case "$1" in
+    "-i")
+        data_path="$2"; shift 2
+        hbs "$source_dir_path/interactive.hbs.sh" "$data_path" "$@"
+        exit
+        ;;
+
+    "-h")
+        cat "$source_dir_path/libslave.h"
+        exit
+        ;;
+esac
 
 data_path="$1"; shift
 hbs "$source_dir_path/libslave.hbs.c" "$data_path" "$@"

@@ -1,22 +1,23 @@
 #!/bin/bash
 set -e
 
-build_path="$(dirname "${BASH_SOURCE[0]}")"
-
 cmd_pipe_path="/tmp/$$.cmd"
 data_pipe_path="/tmp/$$.data"
 
 mkfifo "$cmd_pipe_path" "$data_pipe_path"
 
-trap "
+function cleanup() {
     rm "$cmd_pipe_path" "$data_pipe_path"
-" SIGHUP SIGINT SIGTERM
+    exit
+}
+
+trap cleanup EXIT TERM
 
 chmod 600 "$cmd_pipe_path" "$data_pipe_path"
 
 awk '
     {{#each fns}}
-        /^{{@key}} / {
+        /^{{@key}}{{#if args}} {{else}}${{/if}}/ {
             {{#if result_type}}
                 print "echo \"{{result_label}} $(xx -r --{{result_type}})\"" >"'"$cmd_pipe_path"'"
             {{/if}}
@@ -34,7 +35,11 @@ awk '
         print "Unknown command: " $1 >"/dev/stderr"
         exit -1
     }
-' |"$build_path/slave" >"$data_pipe_path" |(
+
+    END {
+        print "exit" >"'"$cmd_pipe_path"'"
+    }
+' |"{{slave_path}}" |tee "$data_pipe_path" >/dev/null |(
     while read cmd
     do
         eval "$cmd" <"$data_pipe_path"
