@@ -6,19 +6,9 @@
 #include <fcntl.h>
 
 {{#each fns}}
-    {{#if result_type}}
-        {{result_type}}_t
-    {{else}}
-        void
-    {{/if}}
-    {{@key}}(
+    {{either result_c_type 'void'}} {{@key}}(
         {{#each args}}
-            {{#if is_string}}
-                const char *
-            {{else}}
-                {{type}}_t
-            {{/if}}
-            {{@key}}{{if_not @last ','}}
+            {{c_type}} {{@key}}{{if_not @last ','}}
         {{/each}}
     );
 {{/each}}
@@ -51,17 +41,17 @@ ssize_t slave_read_cstr(char *buf, size_t buf_len, FILE *f) {
 {{#each fns}}
     void slave_exec_{{@key}}() {
         {{#each args}}
-            {{#if is_string}}
+            {{#if_cmp c_type 'eq' 'const char *'}}
                 char {{@key}}[max_string_len];
                 assert(slave_read_cstr({{@key}}, sizeof({{@key}}), stdin) != -1);
             {{else}}
-                {{type}}_t {{@key}};
+                {{c_type}} {{@key}};
                 assert(fread_auto(stdin, &{{@key}}, 1));
-            {{/if}}
+            {{/if_cmp}}
         {{/each}}
 
-        {{#if result_type}}
-            {{result_type}}_t result =
+        {{#if result_c_type}}
+            {{result_c_type}} result =
         {{/if}}
         {{@key}}(
             {{#each args}}
@@ -69,7 +59,7 @@ ssize_t slave_read_cstr(char *buf, size_t buf_len, FILE *f) {
             {{/each}}
         );
 
-        {{#if result_type}}
+        {{#if result_c_type}}
             assert(fwrite_auto(stdout, &result, 1) == 1);
         {{/if}}
     }

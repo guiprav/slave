@@ -2,26 +2,32 @@
     "slave_path": "build/slave_test",
     "fns": {
         "add": {
-            "result_type": "int32",
+            "result_c_type": "int",
+            "result_bin_type": "int32",
             "result_label": "result",
             "args": {
                 "a": {
-                    "type": "int32"
+                    "c_type": "int",
+                    "bin_type": "int32"
                 },
                 "b": {
-                    "type": "int32"
+                    "c_type": "int",
+                    "bin_type": "int32"
                 }
             }
         },
         "multiply": {
-            "result_type": "int32",
+            "result_c_type": "int",
+            "result_bin_type": "int32",
             "result_label": "result",
             "args": {
                 "a": {
-                    "type": "int32"
+                    "c_type": "int",
+                    "bin_type": "int32"
                 },
                 "b": {
-                    "type": "int32"
+                    "c_type": "int",
+                    "bin_type": "int32"
                 }
             }
         }

@@ -18,10 +18,11 @@ chmod 600 "$cmd_pipe_path" "$data_pipe_path"
 awk '
     {{#each fns}}
         /^{{@key}}{{#if args}} {{else}}${{/if}}/ {
-            {{#if result_type}}
-                print "echo \"{{result_label}} $(xx -r --{{result_type}})\"" >"'"$cmd_pipe_path"'"
+            {{#if result_c_type}}
+                {{assert result_bin_type "Missing binary type."}}
+                print "echo \"{{result_label}} $(xx -r --{{result_bin_type}})\"" >"'"$cmd_pipe_path"'"
             {{/if}}
-            system("xx --uint32 {{@index}}"{{#each args}} " --{{type}} " ${{add @index 2}}{{/each}});
+            system("xx --uint32 {{@index}}"{{#each args}} " --{{bin_type}} " ${{add @index 2}}{{/each}});
             next
         }
     {{/each}}
