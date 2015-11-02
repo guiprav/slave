@@ -1,12 +1,12 @@
 {
-  "name": "pipedream",
+  "name": "slave",
   "author": "Guilherme Vieira (super.driver.512@gmail.com)",
   "license": "AGPL-3.0+",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sonetto/pipedream"
+    "url": "https://github.com/n2liquid/slave"
   },
   "bugs": {
-    "url": "https://github.com/sonetto/pipedream/issues"
+    "url": "https://github.com/n2liquid/slave/issues"
   }
 }
